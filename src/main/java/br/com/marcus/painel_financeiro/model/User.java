@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import br.com.marcus.painel_financeiro.dto.UserRequestDTO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,6 +27,12 @@ public class User {
     
     @UpdateTimestamp
     private Instant updateTimeStamp;
+
+    public User(UserRequestDTO dto) {
+        this.username = dto.username();
+        this.password = dto.password();
+        this.email = dto.email();
+    }
     
     public User(UUID userid, String username, String password, String email,
             Instant creationTimeStamp, Instant updateTimeStamp) {

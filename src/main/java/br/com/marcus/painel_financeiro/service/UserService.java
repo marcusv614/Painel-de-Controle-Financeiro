@@ -1,10 +1,12 @@
 package br.com.marcus.painel_financeiro.service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import br.com.marcus.painel_financeiro.dto.UserRequestDTO;
+import br.com.marcus.painel_financeiro.dto.UserResponseDTO;
 import br.com.marcus.painel_financeiro.model.User;
 import br.com.marcus.painel_financeiro.repository.UserRepository;
 
@@ -25,5 +27,33 @@ public class UserService {
         var userSaved = repo.save(entity);
 
         return userSaved.getUserid();
+    }
+
+    public UserResponseDTO showUser(UUID id) {
+        User model = repo.findById(id).orElseThrow(() -> new RuntimeException("User not found!"));
+        UserResponseDTO response = new UserResponseDTO(model);
+        return response;
+    }
+
+    public List<UserResponseDTO> showAllUsers() {
+        List<UserResponseDTO> list = repo.findAll()
+        .stream()
+        .map((User model) -> new UserResponseDTO(model))
+        .toList();
+        return list;
+    }
+
+    public UserResponseDTO updateUser(UUID id, UserRequestDTO dto) {
+        User model = new User(dto);
+        model.setUsername(dto.username());
+        model.setPassword(dto.password());
+        model.setEmail(dto.email());
+        model.setUpdateTimeStamp(Instant.now());
+        UserResponseDTO newUser = new UserResponseDTO(repo.save(model));
+        return newUser;
+    }
+
+    public void deleteUser(UUID id) {
+        repo.deleteById(id);
     }
 }
