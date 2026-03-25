@@ -1,5 +1,6 @@
 package br.com.marcus.painel_financeiro.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,7 +56,7 @@ public class UserServiceTest {
             );
 
             //retorna o usuário quando o repo.save() é chamado
-            doReturn(user).when(repo).save(any());
+            doReturn(user).when(repo).save(userArgumentCaptor.capture());
 
             //input do método. Simula o RequestBody que vem na requisição
             var input = new UserRequestDTO(
@@ -66,7 +67,14 @@ public class UserServiceTest {
 
             //Act
             var output = service.createUser(input);
+
+            var userCaptured = userArgumentCaptor.getValue();
+
+            //Assert
             assertNotNull(output);
+            assertEquals(input.username(), userCaptured.getUsername());
+            assertEquals(input.password(), userCaptured.getPassword());
+            assertEquals(input.email(), userCaptured.getEmail());
         }
 
         @Test
