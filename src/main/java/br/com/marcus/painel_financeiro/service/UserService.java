@@ -60,6 +60,8 @@ public class UserService {
     }
 
     public void deleteUser(UUID id) {
-        repo.deleteById(id);
+        User userToDelete = repo.findById(id)
+        .orElseThrow(() -> new UserNotFoundException());
+        repo.delete(userToDelete);
     }
 }
