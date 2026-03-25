@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,6 +33,9 @@ public class UserServiceTest {
     @Captor
     private ArgumentCaptor<User> userArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<UUID> idUserArgumentCaptor;
+
     @Mock
     private UserRepository repo;
 
@@ -53,7 +57,7 @@ public class UserServiceTest {
                 Instant.now(),
                 null
                 //cria um usuário para retornar no método
-            );
+            );  
 
             //retorna o usuário quando o repo.save() é chamado
             doReturn(user).when(repo).save(userArgumentCaptor.capture());
@@ -94,6 +98,30 @@ public class UserServiceTest {
             //Act & Assert
             assertThrows(
                 UserNotFoundException.class, () -> service.createUser(input));
+        }
+
+        @Test
+        @DisplayName("Should get user by id with sucess when user is present")
+        void shouldGetUserByIdWithSucessWhenUserIsPresent() {
+            //Arrange 
+            var user = new User(
+                UUID.randomUUID(),
+                "username",
+                "1234",
+                "email@email.com",
+                Instant.now(),
+                null
+                //cria um usuário para retornar no método
+            );
+            doReturn(Optional.of(user)).when(repo).findById(idUserArgumentCaptor.capture());
+            //Act
+            var output = service.showUser(user.getUserid());
+            //Assert
+            assertNotNull(output);
+            assertEquals(user.getUserid(), idUserArgumentCaptor.getValue());
+            assertEquals(user.getPassword(), output.password());
+            assertEquals(user.getUsername(), output.username());
+            assertEquals(user.getEmail(), output.email());
         }
     }
 }
