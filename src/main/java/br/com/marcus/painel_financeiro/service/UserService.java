@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import br.com.marcus.painel_financeiro.dto.UserRequestDTO;
 import br.com.marcus.painel_financeiro.dto.UserResponseDTO;
+import br.com.marcus.painel_financeiro.exceptions.UserNotFoundException;
 import br.com.marcus.painel_financeiro.model.User;
 import br.com.marcus.painel_financeiro.repository.UserRepository;
 
@@ -30,7 +31,7 @@ public class UserService {
     }
 
     public UserResponseDTO showUser(UUID id) {
-        User model = repo.findById(id).orElseThrow(() -> new RuntimeException("User not found!"));
+        User model = repo.findById(id).orElseThrow(() -> new UserNotFoundException("User not found!"));
         UserResponseDTO response = new UserResponseDTO(model);
         return response;
     }
@@ -40,17 +41,22 @@ public class UserService {
         .stream()
         .map((User model) -> new UserResponseDTO(model))
         .toList();
+
         return list;
     }
 
     public UserResponseDTO updateUser(UUID id, UserRequestDTO dto) {
-        User model = new User(dto);
+        User model = repo.findById(id)
+            .orElseThrow(() -> new UserNotFoundException("User not found"));
+
         model.setUsername(dto.username());
         model.setPassword(dto.password());
         model.setEmail(dto.email());
         model.setUpdateTimeStamp(Instant.now());
-        UserResponseDTO newUser = new UserResponseDTO(repo.save(model));
-        return newUser;
+
+        User savedUser = repo.save(model);
+        UserResponseDTO savedUserDTO = new UserResponseDTO(savedUser);
+        return savedUserDTO;
     }
 
     public void deleteUser(UUID id) {
