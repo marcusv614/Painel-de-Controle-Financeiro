@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -176,7 +178,98 @@ public class UserServiceTest {
     }
 
     @Nested
-    class deleteUser {
-        
+    class DeleteUser {
+
+        @Test
+        @DisplayName("Should delete user with sucess")
+        void shouldDeleteUserWithSucess() {
+               // Arrange
+            var id = UUID.randomUUID();
+
+            var user = new User(
+                id,
+                "username",
+                "1234",
+                "email@email.com",
+                Instant.now(),
+                null
+            );
+
+            doReturn(Optional.of(user))
+                .when(repo)
+                .findById(id);
+
+            doNothing()
+                .when(repo)
+                .delete(user);
+
+            //Act
+            service.deleteUser(id);
+
+            //Assert
+            verify(repo).findById(id);
+            verify(repo).delete(user);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when deleting non-existing user")
+        void shouldThrowExceptionWhenDeletingNonExistingUser() {
+            // Arrange
+            var id = UUID.randomUUID();
+
+            doReturn(Optional.empty())
+                .when(repo)
+                .findById(id);
+
+            // Act & Assert
+            assertThrows(UserNotFoundException.class, () -> service.deleteUser(id));
+        }
+    }
+
+    @Nested
+    class UpdateUser {
+
+        @Test
+        @DisplayName("Should update user with success")
+        void shouldUpdateUserWithSuccess() {
+            // Arrange
+            var id = UUID.randomUUID();
+            var existingUser = new User(
+                id,
+                "username",
+                "1234",
+                "email@email.com",
+                Instant.now(),
+                null
+            );
+
+            var dto = new UserRequestDTO("newuser", "newpass", "new@email.com");
+
+            doReturn(Optional.of(existingUser)).when(repo).findById(id);
+            doReturn(new User(id, dto.username(), dto.password(), dto.email(), existingUser.getCreationTimeStamp(), Instant.now()))
+                .when(repo).save(existingUser);
+
+            // Act
+            var response = service.updateUser(id, dto);
+
+            // Assert
+            assertNotNull(response);
+            assertEquals(dto.username(), response.username());
+            assertEquals(dto.password(), response.password());
+            assertEquals(dto.email(), response.email());
+        }
+
+        @Test
+        @DisplayName("Should throw exception when update user not found")
+        void shouldThrowExceptionWhenUpdateUserNotFound() {
+            // Arrange
+            var id = UUID.randomUUID();
+            var dto = new UserRequestDTO("newuser", "newpass", "new@email.com");
+
+            doReturn(Optional.empty()).when(repo).findById(id);
+
+            // Act & Assert
+            assertThrows(UserNotFoundException.class, () -> service.updateUser(id, dto));
+        }
     }
 }
