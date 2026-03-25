@@ -44,6 +44,7 @@ public class UserServiceTest {
 
     @Nested
     class CreateUser {
+        
 
         @Test
         @DisplayName("Should create user with sucess")
@@ -99,7 +100,10 @@ public class UserServiceTest {
             assertThrows(
                 UserNotFoundException.class, () -> service.createUser(input));
         }
+    }
 
+    @Nested
+    class ShowUser {
         @Test
         @DisplayName("Should get user by id with sucess when user is present")
         void shouldGetUserByIdWithSucessWhenUserIsPresent() {
@@ -122,6 +126,22 @@ public class UserServiceTest {
             assertEquals(user.getPassword(), output.password());
             assertEquals(user.getUsername(), output.username());
             assertEquals(user.getEmail(), output.email());
+        }
+
+        @Test
+        @DisplayName("Should throw execption when user not found")
+        void shouldThrowExcetionWhenUserNotFound() {
+            //Arrange
+            var id = UUID.randomUUID();
+
+            doReturn(Optional.empty())
+                .when(repo)
+                .findById(idUserArgumentCaptor.capture());
+            
+            //Act & Assert 
+            assertThrows(UserNotFoundException.class, () -> service.showUser(id));
+
+            assertEquals(id, idUserArgumentCaptor.getValue());
         }
     }
 }
