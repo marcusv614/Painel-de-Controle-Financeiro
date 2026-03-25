@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -143,5 +144,39 @@ public class UserServiceTest {
 
             assertEquals(id, idUserArgumentCaptor.getValue());
         }
+    }
+
+    @Nested
+    class ShowAllUsers {
+
+        @Test
+        @DisplayName("Should return all users with sucess")
+        void shouldReturnAllUsersWithSucess() {
+            //Arrange
+            var user = new User(
+                UUID.randomUUID(),
+                "username",
+                "1234",
+                "email@email.com",
+                Instant.now(),
+                null
+            );
+            var userList = List.of(user);
+            doReturn(userList)
+                .when(repo)
+                .findAll();
+
+            //Act
+            var output = service.showAllUsers();
+
+            //Assert
+            assertNotNull(output);
+            assertEquals(userList.size(), output.size());
+        }
+    }
+
+    @Nested
+    class deleteUser {
+        
     }
 }
