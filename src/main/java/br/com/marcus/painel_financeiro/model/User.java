@@ -1,14 +1,18 @@
 package br.com.marcus.painel_financeiro.model;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import br.com.marcus.painel_financeiro.dto.UserRequestDTO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -17,6 +21,9 @@ public class User {
     @Id
     @GeneratedValue(strategy=GenerationType.UUID)
     private UUID userid;
+
+    @OneToMany(mappedBy="user")
+    private List<Account> accounts;
     
     private String username;
     private String password;
@@ -92,6 +99,14 @@ public class User {
 
     public void setUpdateTimeStamp(Instant updateTimeStamp) {
         this.updateTimeStamp = updateTimeStamp;
+    }
+
+    public List<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(List<Account> accounts) {
+        this.accounts = accounts;
     }
 
 }
